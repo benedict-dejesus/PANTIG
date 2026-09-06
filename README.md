@@ -107,19 +107,42 @@ or add Filipino under your system's text-to-speech settings.
 
 ## Notes on the design
 
-- The syllable sits in a **capiz pane** — the pearl-shell window of an old Filipino house.
-  The pane stays the same on every card so the child always knows where to look; only the
-  light around it changes.
-- Six themes named for familiar things — *mangga, kalamansi, ube, langit, rosas, dalandan* —
-  rotate as the syllables change. The tint lives in the background and accents; the syllable
-  ink is always a deep shade of the theme against a pearl pane, so contrast stays around
-  7:1 no matter which theme is showing.
-- The syllable is set in **Andika**, a typeface SIL designed for beginning readers. Its
-  single-storey `a` and `g` match the print handwriting taught in Philippine schools, so the
-  letters on screen look like the letters a child is learning to write.
-- Accessibility: semantic HTML, real `<button>` elements, a skip link, visible focus rings,
-  labels in Filipino and English, an `aria-live` region announcing each new syllable, and
-  full support for `prefers-reduced-motion`. State is never signalled by colour alone.
+Three layers, back to front:
+
+1. **A mesh gradient.** Three large blurred colour blobs, cross-fading when the theme
+   changes. Six themes named for familiar things — *mangga, kalamansi, ube, langit, rosas,
+   dalandan* — and each one carries **two hue families**, not one: amber with dragonfruit
+   pink, lime with teal, violet with aqua, sky with coral, pink with amber, orange with
+   violet. A faint grain sits over the top so the large gradients do not look plasticky.
+2. **A frosted glass pane** holding the syllable, floating above the mesh. The pane is
+   always the same shape in the same place, so the child always knows where to look —
+   only the light behind it changes.
+3. **Tactile controls.** The primary button is a solid slab sitting on a darker edge that
+   compresses when pressed, so a tap has a physical response.
+
+Some things this deliberately does *not* do:
+
+- **No neumorphic controls.** Neumorphism gives a button the same colour as its background
+  and separates them with faint shadows only. For a five-year-old that destroys the "this
+  is a button" signal, and it cannot pass contrast. Glass and soft depth are used for
+  *surfaces*; anything tappable stays high-contrast and obviously pressable.
+- **No frosted chips.** There are 180 of them in the list, and `backdrop-filter` on each
+  would cost far more than it is worth. They use plain translucent white instead.
+
+Contrast was measured, not eyeballed. Across all six themes the syllable sits between
+**6.9:1 and 10.1:1** against the glass, taken at the thinnest part of the pane over the most
+saturated blob — the worst case. White button labels clear **5.0:1** at every point of every
+gradient, so even the small "Speak" sub-label is legible.
+
+The syllable is set in **Andika**, a typeface SIL designed for beginning readers. Its
+single-storey `a` and `g` match the print handwriting taught in Philippine schools, so the
+letters on screen look like the letters a child is learning to write. **Fredoka** carries the
+interface.
+
+Accessibility: semantic HTML, real `<button>` elements, a skip link, visible focus rings,
+labels in Filipino and English, an `aria-live` region announcing each new syllable, and full
+support for `prefers-reduced-motion`. State is never signalled by colour alone — the Speak
+button changes its label and icon as well as its ring.
 
 ## Licence
 
