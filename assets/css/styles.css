@@ -1,0 +1,633 @@
+/* ==========================================================================
+   Pantig - Filipino syllable reading trainer
+   Developed by Benedict de Jesus
+
+   Three layers, back to front:
+
+     1. a mesh gradient - three blurred colour blobs, two hue families per
+        theme, so no theme is monochromatic
+     2. a frosted glass pane holding the syllable, lifted off the mesh
+     3. chunky tactile controls with a real pressed edge
+
+   The pane is always the same shape in the same place, so the child always
+   knows where to look. Only the colour of the light behind it changes.
+   ========================================================================== */
+
+/* --- Themes -------------------------------------------------------------
+   Each theme carries two hue families in the mesh, a deep ink for the
+   syllable, a bright accent, and a deep button ramp. Buttons stay dark
+   enough for white labels; the mesh carries the brightness.
+   ---------------------------------------------------------------------- */
+
+:root {
+  --base: #fbf7ff;
+  --body-ink: #4b3f63;
+  --muted-ink: #6d6188;
+  --glass-line: rgba(255, 255, 255, 0.85);
+
+  /* mangga - amber + dragonfruit */
+  --mesh-1: #ffb627;
+  --mesh-2: #ff5c8a;
+  --mesh-3: #ffe08a;
+  --ink: #7a2b4f;
+  --accent: #ff7da0;
+  --btn-top: #b45309;
+  --btn-bot: #8a3d06;
+  --btn-edge: #5f2a05;
+
+  --radius-pane: 40px;
+  --radius-control: 26px;
+  --shell: min(100%, 34rem);
+}
+
+[data-theme="kalamansi"] {
+  --mesh-1: #9be15d; --mesh-2: #00c2a8; --mesh-3: #c7f5a8;
+  --ink: #14524a; --accent: #7ed957;
+  --btn-top: #0c7267; --btn-bot: #08544c; --btn-edge: #063c36;
+}
+
+[data-theme="ube"] {
+  --mesh-1: #8b5cf6; --mesh-2: #22d3ee; --mesh-3: #d8b4fe;
+  --ink: #3b1170; --accent: #e879f9;
+  --btn-top: #7c3aed; --btn-bot: #6021c0; --btn-edge: #40139c;
+}
+
+[data-theme="langit"] {
+  --mesh-1: #38bdf8; --mesh-2: #fb7185; --mesh-3: #bae6fd;
+  --ink: #0c3d6b; --accent: #fb7185;
+  --btn-top: #1a63bc; --btn-bot: #134b91; --btn-edge: #0d3667;
+}
+
+[data-theme="rosas"] {
+  --mesh-1: #fb7185; --mesh-2: #fbbf24; --mesh-3: #fecdd3;
+  --ink: #8a1538; --accent: #fbbf24;
+  --btn-top: #be185d; --btn-bot: #921247; --btn-edge: #660c32;
+}
+
+[data-theme="dalandan"] {
+  --mesh-1: #fb923c; --mesh-2: #a78bfa; --mesh-3: #fed7aa;
+  --ink: #7c2d12; --accent: #8b5cf6;
+  --btn-top: #c2410c; --btn-bot: #9a3412; --btn-edge: #6d240c;
+}
+
+/* --- Base --------------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.25rem, 5vw, 2rem);
+  padding: clamp(1rem, 4vw, 2rem) clamp(0.85rem, 4vw, 2rem) 2rem;
+  overflow-x: hidden;
+
+  font-family: "Fredoka", "Trebuchet MS", system-ui, -apple-system, sans-serif;
+  color: var(--body-ink);
+  background-color: var(--base);
+}
+
+/* Layer 1: the mesh. Three blurred blobs whose colours cross-fade when the
+   theme changes - a background-image could not transition. */
+.mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mesh__blob {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(55px);
+  transition: background-color 700ms ease;
+  will-change: background-color;
+}
+
+/* Kept mostly on screen and only lightly overlapped, so both hue families
+   stay readable instead of averaging into one pastel. */
+.mesh__blob--1 {
+  width: 80vw; height: 80vw;
+  min-width: 20rem; min-height: 20rem;
+  top: -16vw; left: -16vw;
+  opacity: 0.95;
+  background-color: var(--mesh-1);
+}
+
+.mesh__blob--2 {
+  width: 68vw; height: 68vw;
+  min-width: 17rem; min-height: 17rem;
+  top: 28vh; right: -18vw;
+  opacity: 0.9;
+  background-color: var(--mesh-2);
+}
+
+.mesh__blob--3 {
+  width: 95vw; height: 72vw;
+  min-width: 22rem; min-height: 18rem;
+  bottom: -16vh; left: -8vw;
+  opacity: 0.8;
+  background-color: var(--mesh-3);
+}
+
+/* Layer 1b: fine grain, so the large flat gradients do not look plasticky. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 50%;
+  top: 0.5rem;
+  transform: translate(-50%, -180%);
+  z-index: 10;
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 10px 30px -12px rgba(45, 25, 80, 0.6);
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus { transform: translate(-50%, 0); }
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--btn-edge);
+  outline-offset: 3px;
+}
+
+/* --- Masthead ----------------------------------------------------------- */
+
+.masthead {
+  width: var(--shell);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.wordmark {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background-image: linear-gradient(100deg, var(--btn-edge), var(--btn-bot));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  margin: 0;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--glass-line);
+  box-shadow: 0 6px 18px -12px rgba(45, 25, 80, 0.5);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted-ink);
+  white-space: nowrap;
+}
+
+/* --- Layer 2: the glass pane -------------------------------------------- */
+
+.shell {
+  width: var(--shell);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 5vw, 1.75rem);
+  flex: 1 0 auto;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 4vw, 1.5rem);
+}
+
+.pane {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(13.5rem, 48vw, 20rem);
+  padding: clamp(1.5rem, 6vw, 2.5rem) 1rem clamp(2.25rem, 7vw, 3rem);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-pane);
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.74));
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4),
+    0 30px 60px -32px rgba(45, 25, 80, 0.55),
+    0 10px 24px -16px rgba(45, 25, 80, 0.3);
+}
+
+/* Where the browser cannot frost, stay opaque rather than washed out. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pane { background: rgba(255, 255, 255, 0.95); }
+}
+
+/* The sill. */
+.pane::after {
+  content: "";
+  position: absolute;
+  bottom: clamp(1rem, 4vw, 1.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3.5rem;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--btn-top));
+  opacity: 0.8;
+  transition: background 700ms ease;
+}
+
+.syllable {
+  margin: 0;
+  font-family: "Andika", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(5rem, 33vw, 10.5rem);
+  line-height: 1;
+  color: var(--ink);
+  text-align: center;
+  transition: color 700ms ease;
+}
+
+/* Gentle size variation, kept inside a narrow legible range. */
+[data-size="s"] .syllable { font-size: clamp(4.7rem, 31vw, 9.9rem); }
+[data-size="l"] .syllable { font-size: clamp(5.3rem, 35vw, 11.1rem); }
+
+.pane.is-swapping .syllable { animation: swap 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+@keyframes swap {
+  from { opacity: 0; transform: translateY(0.5rem) scale(0.9); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+/* --- Layer 3: tactile controls ------------------------------------------ */
+
+.controls {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  width: 100%;
+  min-height: 4.25rem;
+  padding: 0.85rem 1.25rem;
+  border: 0;
+  border-radius: var(--radius-control);
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 90ms ease, box-shadow 90ms ease, background-color 700ms ease;
+}
+
+.btn__label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.btn__fil { font-size: 1.4rem; font-weight: 600; }
+
+.btn__en {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.85;
+  letter-spacing: 0.08em;
+}
+
+.btn__icon { flex: none; width: 1.9rem; height: 1.9rem; }
+
+/* Primary: a solid slab sitting on a darker edge, which compresses on press. */
+.btn--speak {
+  background-image: linear-gradient(180deg, var(--btn-top), var(--btn-bot));
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 6px 0 var(--btn-edge),
+    0 18px 30px -14px var(--btn-edge);
+}
+
+.btn--speak:active {
+  transform: translateY(5px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 0 var(--btn-edge),
+    0 8px 16px -14px var(--btn-edge);
+}
+
+/* Secondary: the same slab in glass. */
+.btn--next {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.78));
+  color: var(--ink);
+  border: 1px solid var(--glass-line);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 5px 0 rgba(45, 25, 80, 0.16),
+    0 16px 26px -18px rgba(45, 25, 80, 0.55);
+}
+
+.btn--next:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 1px 0 rgba(45, 25, 80, 0.16),
+    0 8px 14px -18px rgba(45, 25, 80, 0.55);
+}
+
+/* Speaking is signalled by the label, the icon and a ring - never by colour
+   alone. */
+.btn--speak[data-speaking="true"] {
+  animation: pulse 1.15s ease-out infinite;
+}
+
+@keyframes pulse {
+  from {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 6px 0 var(--btn-edge),
+      0 0 0 0 rgba(255, 255, 255, 0.8);
+  }
+  to {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 6px 0 var(--btn-edge),
+      0 0 0 16px rgba(255, 255, 255, 0);
+  }
+}
+
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn[disabled]:active { transform: none; }
+
+/* Parent-facing, so it stays quieter than anything the child uses. */
+.note {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid var(--glass-line);
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--muted-ink);
+}
+
+/* --- Syllable list ------------------------------------------------------ */
+
+.list {
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-pane);
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 18px 40px -30px rgba(45, 25, 80, 0.6);
+  overflow: hidden;
+}
+
+.list > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.1rem 1.35rem;
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  list-style: none;
+  transition: color 700ms ease;
+}
+
+.list > summary::-webkit-details-marker,
+.help > summary::-webkit-details-marker { display: none; }
+
+/* One chevron, same behaviour on both disclosures. */
+.list > summary::after,
+.help > summary::after {
+  content: "";
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: auto;
+  border-right: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  transform: translateY(-0.15em) rotate(45deg);
+  transition: transform 220ms ease;
+}
+
+.list[open] > summary::after,
+.help[open] > summary::after {
+  transform: translateY(0.1em) rotate(-135deg);
+}
+
+.list__count {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background-image: linear-gradient(180deg, var(--btn-top), var(--btn-bot));
+  color: #fff;
+  box-shadow: 0 4px 10px -6px var(--btn-edge);
+}
+
+.list__body { padding: 0 1rem 1.35rem; }
+
+.list__hint {
+  margin: 0 0 0.9rem;
+  font-size: 0.8rem;
+  color: var(--muted-ink);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr));
+  gap: 0.55rem;
+}
+
+/* No backdrop-filter here: there are 180 of these, and frosting each one
+   would cost far more than it is worth. */
+.chip {
+  min-height: 3.2rem;
+  padding: 0.35rem 0.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.82));
+  color: var(--body-ink);
+  font-family: "Andika", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 3px 0 rgba(45, 25, 80, 0.1),
+    0 8px 14px -10px rgba(45, 25, 80, 0.4);
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.chip:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 0 0 rgba(45, 25, 80, 0.1),
+    0 4px 8px -10px rgba(45, 25, 80, 0.4);
+}
+
+.chip[data-current="true"] {
+  background-image: linear-gradient(180deg, var(--btn-top), var(--btn-bot));
+  border-color: transparent;
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 3px 0 var(--btn-edge),
+    0 10px 18px -10px var(--btn-edge);
+}
+
+/* --- Colophon and credit ------------------------------------------------ */
+
+.colophon {
+  width: var(--shell);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.help > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted-ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+.help ol {
+  margin: 0.35rem 0 0;
+  padding-left: 1.3rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--muted-ink);
+}
+
+.credit {
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius-pane);
+  border: 1px solid var(--glass-line);
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.62));
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 20px 44px -32px rgba(45, 25, 80, 0.6);
+  text-align: center;
+}
+
+.credit__name {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background-image: linear-gradient(100deg, var(--btn-edge), var(--btn-bot));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.credit__what {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.85rem;
+  color: var(--muted-ink);
+}
+
+.credit__rule {
+  width: 3rem;
+  height: 5px;
+  margin: 0 auto 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--btn-top));
+  transition: background 700ms ease;
+}
+
+.credit__by {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-ink);
+}
+
+.credit__dev {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--body-ink);
+}
+
+/* --- Wider screens ------------------------------------------------------ */
+
+@media (min-width: 30rem) {
+  .controls { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 48rem) {
+  :root { --shell: 40rem; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr)); }
+  .mesh__blob { filter: blur(90px); }
+}
+
+/* --- Motion preferences ------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

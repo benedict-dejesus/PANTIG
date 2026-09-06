@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fil">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pantig &middot; Sanayan sa pagbasa ng pantig</title>
+  <meta name="description" content="Pantig is a Filipino syllable reading trainer for young children. See a syllable, try to read it, then hear how it sounds. Developed by Benedict de Jesus.">
+  <meta name="theme-color" content="#fbf7ff">
+  <meta name="color-scheme" content="light">
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&amp;family=Fredoka:wght@400;500;600&amp;display=swap">
+
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="mesh" aria-hidden="true">
+    <span class="mesh__blob mesh__blob--1"></span>
+    <span class="mesh__blob mesh__blob--2"></span>
+    <span class="mesh__blob mesh__blob--3"></span>
+  </div>
+
+  <a class="skip-link" href="#pantig-stage">Dumiretso sa pantig</a>
+
+  <header class="masthead">
+    <p class="wordmark">Pantig</p>
+    <p class="tagline">Tingnan &middot; Basahin &middot; Pakinggan</p>
+  </header>
+
+  <div class="shell">
+    <main>
+      <section class="stage" id="pantig-stage" aria-labelledby="stage-heading">
+        <h1 class="sr-only" id="stage-heading">Basahin ang pantig</h1>
+
+        <div class="pane" id="pane">
+          <p class="syllable" id="syllable" aria-live="polite" aria-atomic="true">ba</p>
+        </div>
+
+        <div class="controls">
+          <button type="button" class="btn btn--speak" id="speak-button" data-speaking="false">
+            <svg class="btn__icon" id="speak-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 5 6 9H3v6h3l5 4z"></path>
+              <path d="M15.5 8.5a5 5 0 0 1 0 7" class="wave"></path>
+              <path d="M18.5 5.5a9 9 0 0 1 0 13" class="wave"></path>
+            </svg>
+            <span class="btn__label">
+              <span class="btn__fil" id="speak-label-fil">Pakinggan</span>
+              <span class="btn__en" id="speak-label-en">Speak</span>
+            </span>
+          </button>
+
+          <button type="button" class="btn btn--next" id="next-button">
+            <span class="btn__label">
+              <span class="btn__fil">Susunod</span>
+              <span class="btn__en">Next</span>
+            </span>
+            <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h13"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <p class="note" id="speech-note" hidden></p>
+      </section>
+
+      <details class="list">
+        <summary>
+          <span>Lahat ng pantig</span>
+          <span class="list__count" id="list-count">180</span>
+        </summary>
+        <div class="list__body">
+          <p class="list__hint">Pindutin ang alinman para marinig ito. Tap any syllable to hear it.</p>
+          <div class="grid" id="syllable-grid" role="list"></div>
+        </div>
+      </details>
+    </main>
+
+    <footer class="colophon">
+      <details class="help">
+        <summary>Paano gamitin &middot; How to use</summary>
+        <ol>
+          <li>Tingnan ang malaking pantig. <em>Look at the big syllable.</em></li>
+          <li>Subukang basahin ito nang malakas. <em>Try to read it aloud.</em></li>
+          <li>Pindutin ang <strong>Pakinggan</strong> para marinig ang tamang bigkas. <em>Tap Speak to hear it.</em></li>
+          <li>Pindutin ang <strong>Susunod</strong> para sa bagong pantig. <em>Tap Next for another one.</em></li>
+        </ol>
+      </details>
+
+      <section class="credit" aria-label="Tungkol sa Pantig">
+        <p class="credit__name">Pantig</p>
+        <p class="credit__what">Sanayan sa pagbasa ng pantig &middot; A Filipino syllable reading trainer</p>
+        <hr class="credit__rule">
+        <p class="credit__by">Developed by</p>
+        <p class="credit__dev">Benedict de Jesus</p>
+      </section>
+    </footer>
+  </div>
+
+  <script src="assets/js/syllables.js"></script>
+  <script src="assets/js/speech.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
