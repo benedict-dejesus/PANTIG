@@ -123,15 +123,22 @@
       return;
     }
 
-    if (Speech.hasFilipinoVoice()) {
+    // A real Filipino voice needs no explanation.
+    if (Speech.style() === 'native') {
       el.note.hidden = true;
       return;
     }
 
     // Honest about the limitation, quiet about it, and only when it applies.
-    el.note.textContent =
-      'Walang Filipino voice dito - ginagamit ang pinakamalapit na tunog. ' +
-      '(No Filipino voice on this device.)';
+    // The voice is named so an adult can tell what the phone actually used.
+    var using = Speech.voiceName()
+      ? ' Ginagamit: ' + Speech.voiceName() + '.'
+      : '';
+
+    el.note.textContent = Speech.style() === 'spanish'
+      ? 'Walang Filipino voice dito, kaya boses na Espanyol ang ginagamit - halos pareho ang patinig.' + using
+      : 'Walang Filipino voice dito - ginagamit ang pinakamalapit na tunog.' + using;
+
     el.note.hidden = false;
   }
 

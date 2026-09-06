@@ -91,19 +91,42 @@ Pantig uses `SpeechSynthesis`, the speech engine already built into the browser.
 and works offline once the page has loaded, but the available voices are decided by the
 device, not by the app. This is worth knowing before you test it:
 
-- **If a Filipino voice is installed** (`fil-PH` or `tl-PH`), Pantig uses it and speaks the
-  syllable directly. Most Android phones have one, and so do many Windows installs.
-- **If there isn't one**, Pantig picks the best available voice and respells the syllable
-  phonetically first — `ba` → `bah`, `bi` → `bee`, `bu` → `boo`, and `gi` → `ghee` to keep
-  the hard *g*. An English voice then produces a close Filipino sound instead of saying
-  "bay". The app says so, quietly, under the buttons when this happens.
-- Either way the syllable is spoken as a **sound**, never spelled out. `Ba` is lowercased
-  before speaking, so it is pronounced "ba" and not "B-A".
-- **If the browser has no speech support at all**, the Speak button is disabled with an
-  explanation and Pantig keeps working as a visual syllable trainer.
+Pantig picks the best of three pronunciation styles, and the note under the buttons names
+the voice it actually used:
 
-For the most accurate pronunciation, use an Android phone with the Filipino language pack,
-or add Filipino under your system's text-to-speech settings.
+1. **A Filipino voice** (`fil-PH` or `tl-PH`) — the syllable is spoken as written. This is
+   the only genuinely natural option.
+2. **A Spanish voice** — Filipino's five vowels are essentially Spanish vowels, so a Spanish
+   voice sounds much closer to Filipino than an English one. The syllable is rewritten into
+   Spanish spelling so the voice produces the Filipino sound: `ki` → `qui`, `ka` → `ca`,
+   `gi` → `gui`, `ha` → `ja`, `ja` → `dya`, `wa` → `hua`.
+3. **Any other voice** — respelled phonetically so an English voice says `bah`, `bee`, `boo`
+   and `ghee` rather than "bay" and "gee".
+
+Either way the syllable is spoken as a **sound**, never spelled out. `Ba` is lowercased
+before speaking, so it is pronounced "ba" and not "B-A". If the browser has no speech
+support at all, the Speak button is disabled with an explanation and Pantig keeps working
+as a visual syllable trainer.
+
+### Getting a real Filipino voice
+
+**Android** — this is worth doing; it is the difference between natural and approximate.
+Settings → System → Languages & input → **Text-to-speech output** → Google Text-to-speech →
+Install voice data → **Filipino**. Reload Pantig afterwards; the note under the buttons
+should disappear.
+
+**iPhone and iPad** — Apple does not ship a Filipino or Tagalog voice, so there is nothing
+to install. Pantig falls back to a Spanish voice, which is the closest available. Adding a
+Spanish voice under Settings → Accessibility → Spoken Content → Voices improves it.
+
+### If you hear nothing on a phone
+
+- Speech must be started by a tap. Pantig does this correctly, but a page left open from an
+  older version may need a reload.
+- On iPhone, the **silent/ringer switch** mutes speech synthesis in several iOS versions.
+- Check the **media** volume specifically, not just the ringer volume.
+- The app already requests maximum volume; anything quieter than expected comes from the
+  chosen voice or the system output level.
 
 ## Notes on the design
 
