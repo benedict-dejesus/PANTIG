@@ -99,9 +99,22 @@ the voice it actually used:
 2. **A Spanish voice** — Filipino's five vowels are essentially Spanish vowels, so a Spanish
    voice sounds much closer to Filipino than an English one. The syllable is rewritten into
    Spanish spelling so the voice produces the Filipino sound: `ki` → `qui`, `ka` → `ca`,
-   `gi` → `gui`, `ha` → `ja`, `ja` → `dya`, `wa` → `hua`.
+   `gi` → `gui`, `wa` → `hua`.
 3. **Any other voice** — respelled phonetically so an English voice says `bah`, `bee`, `boo`
    and `ghee` rather than "bay" and "gee".
+
+**The `h` and `j` families are the exception.** Spanish has neither sound — its `h` is
+silent and its `j` is the guttural /x/ of "loch" — so no Spanish spelling can produce
+Filipino `ha` or `ja`. English has both natively, so those ten syllables are always spoken
+by an English voice, even when everything else is using a Spanish one:
+
+| | a | e | i | o | u |
+|---|---|---|---|---|---|
+| **h** | as in h**a**lf | as in **he**ck | as in **hi**t | as in **ho**logram | as in w**ho** |
+| **j** | as in **ja**r | as in **je**t | as in **ji**ngle | as in **jo**y | as in **ju**ice |
+
+On the rare device with a Spanish voice but no English one, they fall back to a rough
+Spanish approximation, which is at least audible.
 
 Either way the syllable is spoken as a **sound**, never spelled out. `Ba` is lowercased
 before speaking, so it is pronounced "ba" and not "B-A". If the browser has no speech

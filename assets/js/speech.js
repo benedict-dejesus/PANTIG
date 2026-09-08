@@ -9,7 +9,9 @@
  *   spanish  a Spanish voice. Filipino's five vowels are essentially Spanish
  *            vowels, so a Spanish voice sounds far closer to Filipino than an
  *            English one. The syllable is rewritten into Spanish spelling so
- *            the voice produces the Filipino sound: "ki" -> "qui", "ha" -> "ja".
+ *            the voice produces the Filipino sound: "ki" -> "qui", "ga" -> "ga".
+ *            The h and j families are the exception - Spanish has neither
+ *            sound, so an English voice speaks those two (see below).
  *   english  last resort. Respelled phonetically so an English voice says
  *            "bah" rather than "bay".
  *
@@ -27,6 +29,7 @@
   var supported = typeof global.SpeechSynthesisUtterance === 'function' && !!synth;
 
   var voice = null;
+  var englishVoice = null;
   var style = 'english';
   var changeHandlers = [];
 
@@ -42,9 +45,28 @@
   var ES_ONSETS = {
     k: { a: 'ca',  e: 'que', i: 'qui', o: 'co',  u: 'cu' },   // hard k
     g: { a: 'ga',  e: 'gue', i: 'gui', o: 'go',  u: 'gu' },   // hard g
-    h: { a: 'ja',  e: 'je',  i: 'ji',  o: 'jo',  u: 'ju' },   // Spanish h is silent
-    j: { a: 'dya', e: 'dye', i: 'dyi', o: 'dyo', u: 'dyu' },  // Filipino j is /dʒ/
     w: { a: 'hua', e: 'hue', i: 'hui', o: 'huo', u: 'huu' }   // Spanish has no w
+  };
+
+  /*
+   * Spanish cannot make these two families at all. Its "h" is silent and its
+   * "j" is the guttural /x/ of "loch", and it has no dependable /dʒ/ either -
+   * so no Spanish spelling yields Filipino "ha" or "ja". English has both
+   * sounds natively, so these are spoken by an English voice instead:
+   *
+   *   ha he hi ho hu   as in  half, heck, hi, hologram, who
+   *   ja je ji jo ju   as in  jar, jet, jingle, joy, juice
+   */
+  var ENGLISH_ONLY_ONSETS = { h: true, j: true };
+
+  /*
+   * Last resort for those two families on the rare device that has a Spanish
+   * voice but no English one. Rough, but audible: without it, Spanish would
+   * read "ha" with a silent h and say only "a".
+   */
+  var ES_LAST_RESORT = {
+    h: { a: 'ja',  e: 'je',  i: 'ji',  o: 'jo',  u: 'ju' },
+    j: { a: 'dya', e: 'dye', i: 'dyi', o: 'dyo', u: 'dyu' }
   };
 
   function respell(syllable, forStyle) {
@@ -65,9 +87,32 @@
     return consonant + (EN_VOWELS[vowel] || vowel);
   }
 
+  /**
+   * Decide what to say and which voice says it.
+   *
+   * @returns {{text: string, voice: (SpeechSynthesisVoice|null)}}
+   */
+  function plan(syllable) {
+    var lower = syllable.toLowerCase();
+
+    if (style === 'native') return { text: lower, voice: voice };
+
+    // Borrow an English voice for the two families Spanish cannot produce.
+    if (style === 'spanish' && lower.length > 1 && ENGLISH_ONLY_ONSETS[lower.charAt(0)]) {
+      if (englishVoice) {
+        return { text: respell(lower, 'english'), voice: englishVoice };
+      }
+      return {
+        text: ES_LAST_RESORT[lower.charAt(0)][lower.charAt(1)],
+        voice: voice
+      };
+    }
+
+    return { text: respell(lower, style), voice: voice };
+  }
+
   function textFor(syllable) {
-    if (style === 'native') return syllable.toLowerCase();
-    return respell(syllable, style);
+    return plan(syllable).text;
   }
 
   /* --- Choosing a voice -------------------------------------------------- */
@@ -85,6 +130,10 @@
     return (candidate.lang || '').toLowerCase().replace('_', '-').indexOf('es') === 0;
   }
 
+  function isEnglish(candidate) {
+    return (candidate.lang || '').toLowerCase().replace('_', '-').indexOf('en') === 0;
+  }
+
   function selectVoice() {
     if (!supported) return;
 
@@ -92,6 +141,13 @@
     if (!voices.length) return;
 
     var previous = voice;
+
+    // Held aside for the h and j families when the main voice is Spanish.
+    var englishVoices = voices.filter(isEnglish);
+    englishVoice = englishVoices.filter(function (candidate) {
+      return candidate.default;
+    })[0] || englishVoices[0] || null;
+
     var found = voices.filter(isFilipino)[0];
 
     if (found) {
@@ -182,12 +238,13 @@
     synth.cancel();
     if (synth.paused) synth.resume();
 
-    var utterance = new global.SpeechSynthesisUtterance(textFor(syllable));
+    var choice = plan(syllable);
+    var utterance = new global.SpeechSynthesisUtterance(choice.text);
 
     // Only ever name a language we actually have a voice for.
-    if (voice) {
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
+    if (choice.voice) {
+      utterance.voice = choice.voice;
+      utterance.lang = choice.voice.lang;
     }
 
     utterance.rate = 0.8;    // slow enough for a beginning reader
@@ -250,6 +307,8 @@
     speak: speak,
     respell: respell,
     textFor: textFor,
+    planFor: plan,
+    englishVoiceName: function () { return englishVoice ? englishVoice.name : null; },
     style: function () { return style; },
     hasFilipinoVoice: function () { return style === 'native'; },
     voiceName: function () { return voice ? voice.name : null; },
