@@ -116,15 +116,27 @@ the voice it actually used:
    it in an open syllable. `oo` has the right quality and is only longer. A Spanish or
    Filipino voice produces all five vowels correctly and short.
 
-**One voice speaks every syllable.** Switching voices mid-drill to get a few letters closer
-is more confusing for a child than a consistent approximation.
+**The `h` and `j` families are the exception.** Spanish has neither sound — its `h` is
+silent, and it has no clean /dʒ/ — so no Spanish spelling produces Filipino `ha` or `ja`.
+English has both natively, so those ten syllables are spoken by an English voice even when
+everything else is using a Spanish one:
 
-That costs something on `h` and `j`, the two families Spanish cannot make: its `h` is
-silent, and it has no clean /dʒ/. So `ha` is spelled `ja` and `ja` is spelled `dya`.
-Latin American Spanish voices are preferred over Castilian precisely here — their `j` is a
-soft /h/, close to Filipino, where the Castilian `j` is the hard /x/ of "loch". `ja` is
-spelled `dya` rather than `ya` so it stays audibly distinct from the `y` family; `ya` and
-`ja` are different letters a child has to tell apart.
+| | a | e | i | o | u |
+|---|---|---|---|---|---|
+| **h** | as in h**a**lf | as in **he**ck | as in **he** | as in **ho**logram | as in w**ho** |
+| **j** | as in **ja**r | as in **je**t | as in **jee**p | as in **jo**y | as in **ju**ice |
+
+Those ten are heard *beside* Spanish vowels, so they use their own vowel table matched to
+Spanish rather than the English-tier one. Only `i` differs, and it is the one that matters:
+Spanish `i` is a short close [i], so `si` sounds like a clipped "see". The English-tier `ih`
+is [ɪ], the different, more open vowel of "hit" — `hih` next to Spanish `bi` would sound
+like two different vowels, so beside Spanish it is `hee`, not `hih`.
+
+Latin American Spanish voices are preferred over Castilian for the same reason, as a
+fallback: on a device with a Spanish voice but no English one, `ha` becomes `ja`, and the
+Latin American `j` is a soft /h/ close to Filipino where the Castilian `j` is the hard /x/
+of "loch". There `ja` is spelled `dya` rather than `ya`, so it stays distinct from the `y`
+family — `ya` and `ja` are different letters a child has to tell apart.
 
 A real Filipino voice has all of these sounds and needs none of this.
 
