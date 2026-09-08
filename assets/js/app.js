@@ -137,7 +137,8 @@
 
     el.note.textContent = Speech.style() === 'spanish'
       ? 'Walang Filipino voice dito, kaya boses na Espanyol ang ginagamit - halos pareho ang patinig.' + using
-      : 'Walang Filipino voice dito - ginagamit ang pinakamalapit na tunog.' + using;
+      : 'Walang Filipino o Espanyol na boses dito. Mag-install ng Spanish voice para mas natural ang tunog. ' +
+        '(Install a Spanish voice for natural Filipino vowels.)' + using;
 
     el.note.hidden = false;
   }

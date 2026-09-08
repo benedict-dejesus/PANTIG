@@ -116,18 +116,17 @@ the voice it actually used:
    it in an open syllable. `oo` has the right quality and is only longer. A Spanish or
    Filipino voice produces all five vowels correctly and short.
 
-**The `h` and `j` families are the exception.** Spanish has neither sound — its `h` is
-silent and its `j` is the guttural /x/ of "loch" — so no Spanish spelling can produce
-Filipino `ha` or `ja`. English has both natively, so those ten syllables are always spoken
-by an English voice, even when everything else is using a Spanish one:
+**One voice speaks every syllable.** Switching voices mid-drill to get a few letters closer
+is more confusing for a child than a consistent approximation.
 
-| | a | e | i | o | u |
-|---|---|---|---|---|---|
-| **h** | as in h**a**lf | as in **he**ck | as in **hi**t | as in **ho**logram | as in w**ho** |
-| **j** | as in **ja**r | as in **je**t | as in **ji**ngle | as in **jo**y | as in **ju**ice |
+That costs something on `h` and `j`, the two families Spanish cannot make: its `h` is
+silent, and it has no clean /dʒ/. So `ha` is spelled `ja` and `ja` is spelled `dya`.
+Latin American Spanish voices are preferred over Castilian precisely here — their `j` is a
+soft /h/, close to Filipino, where the Castilian `j` is the hard /x/ of "loch". `ja` is
+spelled `dya` rather than `ya` so it stays audibly distinct from the `y` family; `ya` and
+`ja` are different letters a child has to tell apart.
 
-On the rare device with a Spanish voice but no English one, they fall back to a rough
-Spanish approximation, which is at least audible.
+A real Filipino voice has all of these sounds and needs none of this.
 
 Either way the syllable is spoken as a **sound**, never spelled out. `Ba` is lowercased
 before speaking, so it is pronounced "ba" and not "B-A". If the browser has no speech

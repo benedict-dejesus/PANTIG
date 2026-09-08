@@ -9,11 +9,15 @@
  *   spanish  a Spanish voice. Filipino's five vowels are essentially Spanish
  *            vowels, so a Spanish voice sounds far closer to Filipino than an
  *            English one. The syllable is rewritten into Spanish spelling so
- *            the voice produces the Filipino sound: "ki" -> "qui", "ga" -> "ga".
- *            The h and j families are the exception - Spanish has neither
- *            sound, so an English voice speaks those two (see below).
- *   english  last resort. Respelled phonetically so an English voice says
- *            "bah" rather than "bay".
+ *            the voice produces the Filipino sound: "ki" -> "qui", "ha" -> "ja".
+ *            Latin American voices are preferred; their "j" is a soft /h/.
+ *   english  last resort, used only when the device has no Spanish voice at
+ *            all. Respelled phonetically so an English voice says "bah"
+ *            rather than "bay". English cannot make Filipino's short vowels,
+ *            so installing a Spanish voice is a real improvement.
+ *
+ * One voice speaks every syllable. Mixing voices to get a few letters closer
+ * is more confusing for a child than a consistent approximation.
  *
  * Two rules that matter on phones:
  *
@@ -29,7 +33,6 @@
   var supported = typeof global.SpeechSynthesisUtterance === 'function' && !!synth;
 
   var voice = null;
-  var englishVoice = null;
   var style = 'english';
   var changeHandlers = [];
 
@@ -61,26 +64,14 @@
   var ES_ONSETS = {
     k: { a: 'ca',  e: 'que', i: 'qui', o: 'co',  u: 'cu' },   // hard k
     g: { a: 'ga',  e: 'gue', i: 'gui', o: 'go',  u: 'gu' },   // hard g
-    w: { a: 'hua', e: 'hue', i: 'hui', o: 'huo', u: 'huu' }   // Spanish has no w
-  };
+    w: { a: 'hua', e: 'hue', i: 'hui', o: 'huo', u: 'huu' },  // Spanish has no w
 
-  /*
-   * Spanish cannot make these two families at all. Its "h" is silent and its
-   * "j" is the guttural /x/ of "loch", and it has no dependable /dʒ/ either -
-   * so no Spanish spelling yields Filipino "ha" or "ja". English has both
-   * sounds natively, so these are spoken by an English voice instead:
-   *
-   *   ha he hi ho hu   as in  half, heck, hi, hologram, who
-   *   ja je ji jo ju   as in  jar, jet, jingle, joy, juice
-   */
-  var ENGLISH_ONLY_ONSETS = { h: true, j: true };
-
-  /*
-   * Last resort for those two families on the rare device that has a Spanish
-   * voice but no English one. Rough, but audible: without it, Spanish would
-   * read "ha" with a silent h and say only "a".
-   */
-  var ES_LAST_RESORT = {
+    // Spanish has no /h/ and no clean /dʒ/, so these two are approximations.
+    // Spanish "h" is silent, so "ha" must be spelled "ja"; in Latin American
+    // voices that j is close to Filipino /h/, which is why those voices are
+    // preferred below. "dy" keeps j audibly distinct from the y family - "ya"
+    // would collide with Filipino "ya" and blur two letters the child has to
+    // tell apart.
     h: { a: 'ja',  e: 'je',  i: 'ji',  o: 'jo',  u: 'ju' },
     j: { a: 'dya', e: 'dye', i: 'dyi', o: 'dyo', u: 'dyu' }
   };
@@ -111,19 +102,9 @@
   function plan(syllable) {
     var lower = syllable.toLowerCase();
 
+    // One voice speaks every syllable. Switching voices mid-drill for a few
+    // letters is more confusing for a child than an imperfect approximation.
     if (style === 'native') return { text: lower, voice: voice };
-
-    // Borrow an English voice for the two families Spanish cannot produce.
-    if (style === 'spanish' && lower.length > 1 && ENGLISH_ONLY_ONSETS[lower.charAt(0)]) {
-      if (englishVoice) {
-        return { text: respell(lower, 'english'), voice: englishVoice };
-      }
-      return {
-        text: ES_LAST_RESORT[lower.charAt(0)][lower.charAt(1)],
-        voice: voice
-      };
-    }
-
     return { text: respell(lower, style), voice: voice };
   }
 
@@ -146,8 +127,24 @@
     return (candidate.lang || '').toLowerCase().replace('_', '-').indexOf('es') === 0;
   }
 
-  function isEnglish(candidate) {
-    return (candidate.lang || '').toLowerCase().replace('_', '-').indexOf('en') === 0;
+  /*
+   * Latin American Spanish first. Its "j" is a soft /h/, close to Filipino
+   * "ha"; Castilian "j" is the hard /x/ of "loch". Its "y" is also closer to
+   * the Filipino j sound. Anything not listed still counts as Spanish, just
+   * lower down.
+   */
+  var ES_REGIONS = ['es-us', 'es-mx', 'es-419', 'es-co', 'es-pe', 'es-cl', 'es-ve', 'es-ar'];
+
+  function spanishRank(candidate) {
+    var lang = (candidate.lang || '').toLowerCase().replace('_', '-');
+    var index = ES_REGIONS.indexOf(lang);
+    return index === -1 ? ES_REGIONS.length : index;
+  }
+
+  function bestSpanish(voices) {
+    return voices.filter(isSpanish).sort(function (a, b) {
+      return spanishRank(a) - spanishRank(b);
+    })[0];
   }
 
   function selectVoice() {
@@ -158,19 +155,13 @@
 
     var previous = voice;
 
-    // Held aside for the h and j families when the main voice is Spanish.
-    var englishVoices = voices.filter(isEnglish);
-    englishVoice = englishVoices.filter(function (candidate) {
-      return candidate.default;
-    })[0] || englishVoices[0] || null;
-
     var found = voices.filter(isFilipino)[0];
 
     if (found) {
       voice = found;
       style = 'native';
     } else {
-      found = voices.filter(isSpanish)[0];
+      found = bestSpanish(voices);
       if (found) {
         voice = found;
         style = 'spanish';
@@ -324,7 +315,6 @@
     respell: respell,
     textFor: textFor,
     planFor: plan,
-    englishVoiceName: function () { return englishVoice ? englishVoice.name : null; },
     style: function () { return style; },
     hasFilipinoVoice: function () { return style === 'native'; },
     voiceName: function () { return voice ? voice.name : null; },
