@@ -35,7 +35,23 @@
 
   /* --- Rewriting a syllable for a non-Filipino voice --------------------- */
 
-  var EN_VOWELS = { a: 'ah', e: 'eh', i: 'ee', o: 'oh', u: 'oo' };
+  /*
+   * Filipino vowels are short and pure. English spellings that look obvious
+   * give the long, drifting versions instead, so these are chosen for the
+   * sound an English voice actually produces:
+   *
+   *   a  "ah"   as in half            ("a" alone would be the letter name)
+   *   e  "eh"   as in heck
+   *   i  "ih"   as in hit             ("ee" gives the long /i:/ of "see")
+   *   o  "aw"   as in off             ("oh" gives the "ow" diphthong of "go")
+   *   u  "oo"   as in who             (see the note on /ʊ/ below)
+   *
+   * "oo" is the closest English can get to Filipino "u". English has no word
+   * ending in the short vowel of "put", so no spelling elicits it in an open
+   * syllable - "oo" has the right quality and is only longer. A Spanish or
+   * Filipino voice produces all five correctly and short.
+   */
+  var EN_VOWELS = { a: 'ah', e: 'eh', i: 'ih', o: 'aw', u: 'oo' };
 
   /*
    * Spanish spellings that produce the Filipino sound. Everything not listed

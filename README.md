@@ -100,8 +100,21 @@ the voice it actually used:
    voice sounds much closer to Filipino than an English one. The syllable is rewritten into
    Spanish spelling so the voice produces the Filipino sound: `ki` → `qui`, `ka` → `ca`,
    `gi` → `gui`, `wa` → `hua`.
-3. **Any other voice** — respelled phonetically so an English voice says `bah`, `bee`, `boo`
-   and `ghee` rather than "bay" and "gee".
+3. **Any other voice** — respelled phonetically so an English voice says `bah` rather than
+   "bay", and `ghih` rather than "gee".
+
+   The respellings target Filipino's short, pure vowels, not the long English ones the
+   obvious spelling would give:
+
+   | | a | e | i | o | u |
+   |---|---|---|---|---|---|
+   | **spelled** | `ah` | `eh` | `ih` | `aw` | `oo` |
+   | **as in** | h**a**lf | h**e**ck | h**i**t | **o**ff | wh**o** |
+
+   So `bi` is `bih`, not `bee`; `bo` is `baw`, not `boh`. One limitation is honest to
+   state: English has no word ending in the short vowel of "put", so no spelling elicits
+   it in an open syllable. `oo` has the right quality and is only longer. A Spanish or
+   Filipino voice produces all five vowels correctly and short.
 
 **The `h` and `j` families are the exception.** Spanish has neither sound — its `h` is
 silent and its `j` is the guttural /x/ of "loch" — so no Spanish spelling can produce
